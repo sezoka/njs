@@ -1,0 +1,14 @@
+{
+  "name": "njs",
+  "module": "main.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "start": "bun --watch run src/main.ts"
+  }
+}
