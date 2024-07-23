@@ -23,6 +23,11 @@ export function is_digit(c: char): bool {
   return '0' <= c && c <= '9';
 }
 
+const alpha_regex = /\p{L}/u;
+export function is_alpha(c: char): bool {
+  return alpha_regex.test(c);
+};
+
 export function unreachable(): never {
   throw new Error("unreachable");
 }

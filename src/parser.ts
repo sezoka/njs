@@ -15,7 +15,7 @@ export function parse(tokens: tokens.Token[]): ast.Ast | nil {
   };
 
   const result = [];
-  if (!is_at_end(parser)) {
+  while (!is_at_end(parser)) {
     const expr = parse_expression(parser);
     if (expr === nil) return nil
     result.push(expr);
@@ -29,7 +29,27 @@ function is_at_end(p: Parser): bool {
 }
 
 function parse_expression(p: Parser): ast.Node | nil {
-  return parse_sum(p);
+  return parse_and(p);
+}
+
+function parse_and(p: Parser): ast.Node | nil {
+  let maybe_left = parse_sum(p);
+  if (maybe_left === nil) return nil;
+  let left = maybe_left;
+
+  while (matches(p, "and")) {
+    const right = parse_sum(p);
+    if (right === nil) return nil;
+
+    left = {
+      kind: "binary",
+      value: { left, op: "and", right },
+      line: maybe_left.line,
+      type: types.type_int,
+    }
+  }
+
+  return left;
 }
 
 function parse_sum(p: Parser): ast.Node | nil {
@@ -44,8 +64,8 @@ function parse_sum(p: Parser): ast.Node | nil {
 
     let op: ast.BinOp;
     switch (bin_op_token.data) {
-      case 'minus': op = '-'; break;
-      case 'plus': op = '+'; break;
+      case 'minus': op = 'minus'; break;
+      case 'plus': op = 'plus'; break;
       default: lib.unreachable();
     }
 
@@ -65,15 +85,15 @@ function parse_mult(p: Parser): ast.Node | nil {
   if (maybe_left === nil) return nil;
   let left = maybe_left;
 
-  let bin_op_token: lib.Box<tokens.TokenKind> = { data: "multiply" };
-  while (matches_any(p, ["multiply", "divide"], bin_op_token)) {
+  let bin_op_token: lib.Box<tokens.TokenKind> = { data: "slash" };
+  while (matches_any(p, ["star", "slash"], bin_op_token)) {
     const right = parse_primary(p);
     if (right === nil) return nil;
 
     let op: ast.BinOp;
     switch (bin_op_token.data) {
-      case 'multiply': op = '*'; break;
-      case 'divide': op = '/'; break;
+      case 'star': op = 'multiply'; break;
+      case 'slash': op = 'divide'; break;
       default: lib.unreachable();
     }
 
@@ -88,13 +108,13 @@ function parse_mult(p: Parser): ast.Node | nil {
   return left;
 }
 
-// function matches(p: Parser, tok_kind: tokens.TokenKind): bool {
-//   if (peek(p).kind === tok_kind) {
-//     next(p);
-//     return true;
-//   }
-//   return false;
-// }
+function matches(p: Parser, tok_kind: tokens.TokenKind): bool {
+  if (peek(p).kind === tok_kind) {
+    next(p);
+    return true;
+  }
+  return false;
+}
 
 function matches_any(p: Parser, tok_kinds: tokens.TokenKind[], ptr: lib.Box<tokens.TokenKind>): bool {
   for (let i = 0; i < tok_kinds.length; i += 1) {
@@ -112,12 +132,29 @@ function parse_primary(p: Parser): ast.Node | nil {
   if (tok === nil) return nil;
   switch (tok.kind) {
     case "int":
-      return { kind: "int", value: tok.value, line: tok.line, type: types.type_unknown };
+      return { kind: "int", value: tok.value, line: tok.line, type: types.type_int };
     case "float":
-      return { kind: "float", value: tok.value, line: tok.line, type: types.type_unknown };
+      return { kind: "float", value: tok.value, line: tok.line, type: types.type_float };
+    case "true":
+    case "false":
+      return { kind: "bool", value: tok.kind === "true", line: tok.line, type: types.type_bool };
+    case "left_paren":
+      const expr = parse_expression(p);
+      if (expr === nil) return nil;
+      if (expect(p, "right_paren", "expect ')' after grouping expression, but got '" + tok.lexeme + "'", tok.line)) return nil;
+      return { kind: "grouping", value: { expr }, line: tok.line, type: types.type_unknown };
     default:
-      return err(`unexpected token '${tok.kind}'`, tok.line,);
+      return err(`unexpected token '${tok.lexeme}'`, tok.line,);
   }
+}
+
+function expect(p: Parser, tok_kind: tokens.TokenKind, err_msg: string, line: number): bool {
+  if (peek(p).kind === tok_kind) {
+    next(p);
+    return false;
+  }
+  err(err_msg, line);
+  return true;
 }
 
 function next(p: Parser): tokens.Token | nil {

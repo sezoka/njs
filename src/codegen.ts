@@ -1,4 +1,5 @@
 import * as ast from "./ast";
+import * as lib from "./lib";
 
 
 type Generator = {
@@ -31,12 +32,26 @@ function gen_node(g: Generator, node: ast.Node): boolean {
     case "binary":
       gen_node(g, node.value.left);
       switch (node.value.op) {
-        case "+": append(g, " + "); break;
-        case "-": append(g, " - "); break;
-        case "*": append(g, " * "); break;
-        case "/": append(g, " / "); break;
+        case "plus": append(g, " + "); break;
+        case "minus": append(g, " - "); break;
+        case "multiply": append(g, " * "); break;
+        case "divide": append(g, " / "); break;
+        case "and": append(g, " && "); break;
+        case "or": append(g, " || "); break;
+        default: lib.unreachable();
       }
       gen_node(g, node.value.right);
+      break;
+    case "grouping":
+      append(g, "(");
+      gen_node(g, node.value.expr);
+      append(g, ")");
+      break;
+    case "bool":
+      append(g, node.value.toString());
+      break;
+    default:
+      lib.unreachable();
   }
   return true;
 }

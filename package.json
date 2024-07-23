@@ -9,6 +9,6 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "start": "bun --watch run src/main.ts"
+    "start": "bun run src/main.ts"
   }
 }

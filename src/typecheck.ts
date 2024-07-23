@@ -43,10 +43,10 @@ function check_node(tc: Typechecker, node: ast.Node): bool {
       if (!ok) return false;
 
       switch (binary.op) {
-        case "+":
-        case "-":
-        case "*":
-        case "/":
+        case "plus":
+        case "minus":
+        case "multiply":
+        case "divide":
           if (binary.left.type.kind !== binary.right.type.kind) {
             return err(
               `expect both operands of binary op '${binary.op}' to be of same type, but got '${fmt.format_type(binary.left.type)}' and '${fmt.format_type(binary.right.type)}'`,
@@ -54,7 +54,12 @@ function check_node(tc: Typechecker, node: ast.Node): bool {
           }
           node.type = binary.left.type;
       }
-
+      return true;
+    case "grouping":
+      check_node(tc, node.value.expr);
+      node.type = node.value.expr.type;
+      return true;
+    case "bool":
       return true;
   }
 }

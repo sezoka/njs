@@ -7,16 +7,6 @@ import * as codegen from "./codegen";
 import * as typecheck from "./typecheck";
 
 
-
-
-
-
-
-
-
-
-
-
 async function main() {
   const argv = Bun.argv;
   if (argv.length !== 3) {
