@@ -12,6 +12,7 @@ export function generate(nodes: ast.Ast): string {
 
   for (let i = 0; i < nodes.length; i += 1) {
     gen_node(generator, nodes[i]);
+    append(generator, ";\n");
   }
 
   return generator.buff.join("");
@@ -38,6 +39,12 @@ function gen_node(g: Generator, node: ast.Node): boolean {
         case "divide": append(g, " / "); break;
         case "and": append(g, " && "); break;
         case "or": append(g, " || "); break;
+        case "less": append(g, " < "); break;
+        case "greater": append(g, " ) "); break;
+        case "less_equal": append(g, " <= "); break;
+        case "greater_equal": append(g, " >= "); break;
+        case "equal": append(g, " === "); break;
+        case "not_equal": append(g, " <= "); break;
         default: lib.unreachable();
       }
       gen_node(g, node.value.right);

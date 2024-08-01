@@ -45,12 +45,14 @@ function check_node_impl(tc: Typechecker, node: ast.Node): bool {
       ok = check_node(tc, binary.right);
       if (!ok) return false;
 
+      const left_kind = binary.left.type.kind;
+      const right_kind = binary.left.type.kind;
       switch (binary.op) {
         case "plus":
         case "minus":
         case "multiply":
         case "divide":
-          if (binary.left.type.kind !== binary.right.type.kind) {
+          if (left_kind !== right_kind) {
             return err(
               `expect both operands of binary op '${binary.op}' to be of same type, but got '${fmt.format_type(binary.left.type)}' and '${fmt.format_type(binary.right.type)}'`,
               node.line);
@@ -59,11 +61,28 @@ function check_node_impl(tc: Typechecker, node: ast.Node): bool {
           break;
         case "and":
         case "or":
-          if (binary.left.type.kind !== binary.right.type.kind || binary.left.type.kind !== "bool") {
-            return err(`expect both operans of binary op '${binary.op}' to be of type 'bool', but got '${binary.left.kind}' and '${binary.right.kind}'`, node.line);
+          if (left_kind !== right_kind || left_kind !== "bool") {
+            return err(`expect both operans of binary op '${binary.op}' to be of type 'bool', but got '${left_kind}' and '${right_kind}'`, node.line);
           }
           node.type = types.type_bool;
           break;
+        case "less":
+        case "greater":
+        case "less_equal":
+        case "greater_equal":
+          if (left_kind != right_kind || (left_kind !== "int" && left_kind !== "float")) {
+            return err(`expect both operans of binary op '${binary.op}' to be of type 'int' or 'float', but got '${left_kind}' and '${right_kind}'`, node.line);
+          }
+          node.type = types.type_bool;
+          break;
+        case "equal":
+        case "not_equal":
+          if (left_kind != right_kind) {
+            return err(`expect both operans of binary op '${binary.op}' to be of the same type, but got '${left_kind}' and '${right_kind}'`, node.line);
+          }
+          node.type = types.type_bool;
+          break;
+
         default:
           lib.unreachable()
       }

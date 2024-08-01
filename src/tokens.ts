@@ -21,7 +21,7 @@ export type TokenVart
 
   | lib.Tag<"equal">
   | lib.Tag<"equal_equal">
-  | lib.Tag<"not_qual">
+  | lib.Tag<"not_equal">
   | lib.Tag<"less">
   | lib.Tag<"less_equal">
   | lib.Tag<"greater">

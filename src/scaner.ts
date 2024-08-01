@@ -87,8 +87,8 @@ function get_next_token(l: Lexer): tokens.Token | nil {
       ? create_token(l, { kind: "equal_equal", value: nil })
       : create_token(l, { kind: "equal", value: nil });
     case '!': return match(l, "=")
-      ? create_token(l, { kind: "bang", value: nil })
-      : create_token(l, { kind: "not_qual", value: nil });
+      ? create_token(l, { kind: "not_equal", value: nil })
+      : create_token(l, { kind: "bang", value: nil })
 
     case '&': if (match(l, "&"))
       return create_token(l, { kind: "and", value: nil })

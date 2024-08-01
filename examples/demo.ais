@@ -1,2 +1,9 @@
 
 false && (true || false) || true
+
+2 == 2 // true
+2 != 2 // true
+3 >= 2 // true
+2 >= 2 // true
+2 >= 3 // false
+

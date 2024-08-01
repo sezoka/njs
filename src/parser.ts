@@ -53,12 +53,12 @@ function parse_or(p: Parser): ast.Node | nil {
 }
 
 function parse_and(p: Parser): ast.Node | nil {
-  let maybe_left = parse_sum(p);
+  let maybe_left = parse_equality(p);
   if (maybe_left === nil) return nil;
   let left = maybe_left;
 
   while (matches(p, "and")) {
-    const right = parse_sum(p);
+    const right = parse_equality(p);
     if (right === nil) return nil;
 
     left = {
@@ -72,22 +72,45 @@ function parse_and(p: Parser): ast.Node | nil {
   return left;
 }
 
-function parse_sum(p: Parser): ast.Node | nil {
-  let maybe_left = parse_mult(p);
+function parse_equality(p: Parser): ast.Node | nil {
+  let maybe_left = parse_comparison(p);
   if (maybe_left === nil) return nil;
   let left = maybe_left;
 
-  let bin_op_token: lib.Box<tokens.TokenKind> = { data: "plus" };
-  while (matches_any(p, ["plus", "minus"], bin_op_token)) {
-    const right = parse_mult(p);
+  let bin_op_token: lib.Box<tokens.TokenKind> = { data: "equal" };
+  while (matches_any(p, ["equal_equal", "not_equal"], bin_op_token)) {
+    const right = parse_comparison(p);
     if (right === nil) return nil;
 
     let op: ast.BinOp;
     switch (bin_op_token.data) {
-      case 'minus': op = 'minus'; break;
-      case 'plus': op = 'plus'; break;
+      case 'equal_equal': op = 'equal'; break;
+      case 'not_equal': op = 'not_equal'; break;
       default: lib.unreachable();
     }
+
+    left = {
+      kind: "binary",
+      value: { left, op: op, right },
+      line: maybe_left.line,
+      type: types.type_unknown,
+    }
+  }
+
+  return left;
+}
+
+function parse_comparison(p: Parser): ast.Node | nil {
+  let maybe_left = parse_mult(p);
+  if (maybe_left === nil) return nil;
+  let left = maybe_left;
+
+  let bin_op_token: lib.Box<tokens.TokenKind> = { data: "less" };
+  while (matches_any(p, ["greater", "greater_equal", "less", "less_equal"], bin_op_token)) {
+    const right = parse_mult(p);
+    if (right === nil) return nil;
+
+    let op: ast.BinOp = bin_op_token.data as ast.BinOp;
 
     left = {
       kind: "binary",
