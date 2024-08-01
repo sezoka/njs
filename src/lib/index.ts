@@ -32,4 +32,12 @@ export function unreachable(): never {
   throw new Error("unreachable");
 }
 
+export function assert(cond: boolean, ...msgs: any) {
+  // if (typeof msg === "object")
+  //   msg = JSON.stringify(msg);
 
+  if (!cond) {
+    console.error("ASSERT FAILED\n", ...msgs);
+    throw new Error("ASSERT FAILED");
+  }
+}

@@ -76,6 +76,20 @@ function get_next_token(l: Lexer): tokens.Token | nil {
     case '/': return create_token(l, { kind: "slash", value: nil });
     case '(': return create_token(l, { kind: "left_paren", value: nil });
     case ')': return create_token(l, { kind: "right_paren", value: nil });
+
+    case '<': return match(l, "=")
+      ? create_token(l, { kind: "less_equal", value: nil })
+      : create_token(l, { kind: "less", value: nil });
+    case '>': return match(l, "=")
+      ? create_token(l, { kind: "greater_equal", value: nil })
+      : create_token(l, { kind: "greater", value: nil });
+    case '=': return match(l, "=")
+      ? create_token(l, { kind: "equal_equal", value: nil })
+      : create_token(l, { kind: "equal", value: nil });
+    case '!': return match(l, "=")
+      ? create_token(l, { kind: "bang", value: nil })
+      : create_token(l, { kind: "not_qual", value: nil });
+
     case '&': if (match(l, "&"))
       return create_token(l, { kind: "and", value: nil })
       break;

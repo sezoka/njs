@@ -5,7 +5,7 @@ export type NodeVart
   = lib.Tag<"int", number>
   | lib.Tag<"float", number>
   | lib.Tag<"bool", boolean>
-  | lib.Tag<"binary", { left: Node, op: BinOp, right: Node }>
+  | lib.Tag<"binary", { op: BinOp, left: Node, right: Node }>
   | lib.Tag<"grouping", { expr: Node }>
 
 export type NodeKind = NodeVart["kind"];

@@ -1,5 +1,6 @@
 import * as ast from "./ast";
 import * as fmt from "./fmt";
+import * as lib from "./lib";
 import * as types from "./types";
 
 
@@ -23,9 +24,12 @@ export function check(nodes: ast.Node[]): bool {
 }
 
 function check_node(tc: Typechecker, node: ast.Node): bool {
-  tc;
+  const result = check_node_impl(tc, node);
+  lib.assert(!result || node.type.kind !== "unknown");
+  return result;
+}
 
-  console.log(node.kind);
+function check_node_impl(tc: Typechecker, node: ast.Node): bool {
   switch (node.kind) {
     case "int":
       console.log("DFJLSDFJ");
@@ -36,7 +40,6 @@ function check_node(tc: Typechecker, node: ast.Node): bool {
       return true;
     case "binary":
       const binary = node.value;
-      console.log("HER", binary.left.kind);
       let ok = check_node(tc, binary.left);
       if (!ok) return false;
       ok = check_node(tc, binary.right);
@@ -53,6 +56,16 @@ function check_node(tc: Typechecker, node: ast.Node): bool {
               node.line);
           }
           node.type = binary.left.type;
+          break;
+        case "and":
+        case "or":
+          if (binary.left.type.kind !== binary.right.type.kind || binary.left.type.kind !== "bool") {
+            return err(`expect both operans of binary op '${binary.op}' to be of type 'bool', but got '${binary.left.kind}' and '${binary.right.kind}'`, node.line);
+          }
+          node.type = types.type_bool;
+          break;
+        default:
+          lib.unreachable()
       }
       return true;
     case "grouping":

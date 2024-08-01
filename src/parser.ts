@@ -29,7 +29,27 @@ function is_at_end(p: Parser): bool {
 }
 
 function parse_expression(p: Parser): ast.Node | nil {
-  return parse_and(p);
+  return parse_or(p);
+}
+
+function parse_or(p: Parser): ast.Node | nil {
+  let maybe_left = parse_and(p);
+  if (maybe_left === nil) return nil;
+  let left = maybe_left;
+
+  while (matches(p, "or")) {
+    const right = parse_and(p);
+    if (right === nil) return nil;
+
+    left = {
+      kind: "binary",
+      value: { left, op: "or", right },
+      line: maybe_left.line,
+      type: types.type_unknown,
+    }
+  }
+
+  return left;
 }
 
 function parse_and(p: Parser): ast.Node | nil {
@@ -45,7 +65,7 @@ function parse_and(p: Parser): ast.Node | nil {
       kind: "binary",
       value: { left, op: "and", right },
       line: maybe_left.line,
-      type: types.type_int,
+      type: types.type_unknown,
     }
   }
 
@@ -73,7 +93,7 @@ function parse_sum(p: Parser): ast.Node | nil {
       kind: "binary",
       value: { left, op: op, right },
       line: maybe_left.line,
-      type: types.type_int,
+      type: types.type_unknown,
     }
   }
 

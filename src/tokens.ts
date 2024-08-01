@@ -19,12 +19,13 @@ export type TokenVart
 
   | lib.Tag<"ident", string>
 
-// | lib.Tag<"equal_equal">
-// | lib.Tag<"not_qual">
-// | lib.Tag<"less">
-// | lib.Tag<"less_equal">
-// | lib.Tag<"greater">
-// | lib.Tag<"greater_equal">
+  | lib.Tag<"equal">
+  | lib.Tag<"equal_equal">
+  | lib.Tag<"not_qual">
+  | lib.Tag<"less">
+  | lib.Tag<"less_equal">
+  | lib.Tag<"greater">
+  | lib.Tag<"greater_equal">
 
 export type TokenKind = TokenVart["kind"];
 
